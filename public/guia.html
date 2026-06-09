@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tourist Road Guides - Guía</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="header">
+    <div class="logo"><i class="ti ti-map-2"></i></div>
+    <div>
+      <h1>Tourist Road Guides</h1>
+      <p>Vista Guía</p>
+    </div>
+  </div>
+
+  <div class="panel active" style="display:block;">
+    <div class="card">
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+        <i class="ti ti-microphone" id="micIcon"></i>
+      </button>
+      <p style="font-size:14px; color:#888; margin-bottom:4px;">Estado</p>
+      <p style="font-size:18px; font-weight:500;" id="micStatus">Inactivo</p>
+    </div>
+    <div class="info-row">
+      <div class="info-box">
+        <div class="val" id="listenerCount">0</div>
+        <div class="lbl">escuchando</div>
+      </div>
+      <div class="info-box">
+        <div class="val" id="timeActive">0:00</div>
+        <div class="lbl">tiempo activo</div>
+      </div>
+    </div>
+    <p class="hint">Pulsa el micrófono para empezar a emitir.</p>
+  </div>
+
+  <audio id="remoteAudio" autoplay></audio>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/guia.js"></script>
+</body>
+</html>

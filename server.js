@@ -8,6 +8,15 @@ const io = new Server(server);
 
 app.use(express.static('public'));
 
+// Rutas separadas
+app.get('/guia', (req, res) => {
+  res.sendFile(__dirname + '/public/guia.html');
+});
+
+app.get('/turista', (req, res) => {
+  res.sendFile(__dirname + '/public/turista.html');
+});
+
 let guideId = null;
 let tourists = new Set();
 
@@ -15,15 +24,14 @@ io.on('connection', (socket) => {
   console.log('Usuario conectado:', socket.id);
 
   socket.on('guide-start', () => {
-  guideId = socket.id;
-  console.log('Guía empezó a emitir');
-  socket.broadcast.emit('guide-live', true);
-  io.emit('listener-count', tourists.size);
-  // Avisa al guía de cada turista ya conectado
-  tourists.forEach(touristId => {
-    socket.emit('tourist-ready', { from: touristId });
+    guideId = socket.id;
+    console.log('Guía empezó a emitir');
+    socket.broadcast.emit('guide-live', true);
+    io.emit('listener-count', tourists.size);
+    tourists.forEach(touristId => {
+      socket.emit('tourist-ready', { from: touristId });
+    });
   });
-});
 
   socket.on('guide-stop', () => {
     guideId = null;
@@ -71,6 +79,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log('Servidor corriendo en http://localhost:3000');
+server.listen(process.env.PORT || 3000, () => {
+  console.log('Servidor corriendo');
 });
