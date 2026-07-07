@@ -70,16 +70,17 @@ io.on('connection', (socket) => {
   console.log('Usuario conectado:', socket.id);
 
   socket.on('guide-start', ({ id_grupo }) => {
-    if (!rooms[id_grupo]) rooms[id_grupo] = { guideId: null, tourists: new Set() };
-    rooms[id_grupo].guideId = socket.id;
-    socket.join(id_grupo);
-    socket.to(id_grupo).emit('guide-live', true);
-    io.to(id_grupo).emit('listener-count', rooms[id_grupo].tourists.size);
-    rooms[id_grupo].tourists.forEach(touristId => {
-      socket.emit('tourist-ready', { from: touristId });
-    });
-    console.log(`Guía emitiendo en grupo ${id_grupo}`);
+  if (!rooms[id_grupo]) rooms[id_grupo] = { guideId: null, tourists: new Set() };
+  rooms[id_grupo].guideId = socket.id;
+  socket.join(id_grupo);
+  socket.to(id_grupo).emit('guide-live', true);
+  io.to(id_grupo).emit('listener-count', rooms[id_grupo].tourists.size);
+  // Avisar al guía de cada turista ya conectado
+  rooms[id_grupo].tourists.forEach(touristId => {
+    socket.emit('tourist-ready', { from: touristId });
   });
+  console.log(`Guía emitiendo en grupo ${id_grupo}`);
+});
 
   socket.on('guide-stop', ({ id_grupo }) => {
     if (rooms[id_grupo]) rooms[id_grupo].guideId = null;
@@ -88,16 +89,18 @@ io.on('connection', (socket) => {
   });
 
   socket.on('tourist-ready', ({ id_grupo }) => {
-    if (!rooms[id_grupo]) rooms[id_grupo] = { guideId: null, tourists: new Set() };
-    rooms[id_grupo].tourists.add(socket.id);
-    socket.join(id_grupo);
-    const guideId = rooms[id_grupo].guideId;
-    if (guideId) {
-      io.to(guideId).emit('tourist-ready', { from: socket.id });
-      io.to(id_grupo).emit('listener-count', rooms[id_grupo].tourists.size);
-    }
-    console.log(`Turista unido al grupo ${id_grupo} | Total: ${rooms[id_grupo].tourists.size}`);
-  });
+  if (!rooms[id_grupo]) rooms[id_grupo] = { guideId: null, tourists: new Set() };
+  rooms[id_grupo].tourists.add(socket.id);
+  socket.join(id_grupo);
+  const guideId = rooms[id_grupo].guideId;
+  if (guideId) {
+    io.to(guideId).emit('tourist-ready', { from: socket.id });
+    io.to(id_grupo).emit('listener-count', rooms[id_grupo].tourists.size);
+    // Avisar al turista que el guía ya está emitiendo
+    socket.emit('guide-live', true);
+  }
+  console.log(`Turista unido al grupo ${id_grupo} | Total: ${rooms[id_grupo].tourists.size}`);
+});
 
   socket.on('tourist-leave', ({ id_grupo }) => {
     if (rooms[id_grupo]) {

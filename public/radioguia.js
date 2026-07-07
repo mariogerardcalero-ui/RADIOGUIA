@@ -1,4 +1,10 @@
 const socket = io();
+
+socket.on('connect', () => console.log('Conectado:', socket.id));
+socket.on('guide-live', (live) => console.log('guide-live recibido:', live));
+socket.on('offer', (data) => console.log('Oferta recibida:', data));
+socket.on('tourist-ready', (data) => console.log('tourist-ready recibido:', data));
+
 const params = new URLSearchParams(window.location.search);
 const id_grupo = params.get('id');
 const id_usuario = params.get('usuario');
@@ -10,12 +16,12 @@ let timer = null;
 let localStream = null;
 let peerConnections = {};
 let userTipo = null;
+let guideIsLive = false;
 
 const iceConfig = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
 };
 
-// Verificar usuario al cargar
 async function init() {
   if (!id_grupo || !id_usuario) {
     showError('Faltan parámetros de acceso. Usa ?id=GRUPO&usuario=ID');
@@ -33,7 +39,7 @@ async function init() {
       return;
     }
 
-    userTipo = data.tipo; // 1=turista, 2=guia
+    userTipo = data.tipo;
     document.getElementById('loadingScreen').style.display = 'none';
 
     if (userTipo === '2') {
@@ -55,12 +61,12 @@ function showError(msg) {
   document.getElementById('errorMsg').textContent = msg;
 }
 
-// Socket events
 socket.on('listener-count', (count) => {
   document.getElementById('listenerCount').textContent = count;
 });
 
 socket.on('guide-live', (live) => {
+  guideIsLive = live;
   syncTourist(live);
 });
 
@@ -103,7 +109,6 @@ socket.on('ice-candidate', async ({ candidate, from }) => {
   }
 });
 
-// Funciones guía
 async function toggleMic() {
   micActive = !micActive;
   const btn = document.getElementById('micBtn');
@@ -153,7 +158,6 @@ async function crearOferta(touristId) {
   socket.emit('offer', { offer, to: touristId });
 }
 
-// Funciones turista
 function syncTourist(live) {
   const wave = document.getElementById('audioWave');
   const badge = document.getElementById('listenerBadge');
@@ -179,13 +183,20 @@ function toggleJoin() {
   if (joined) {
     btn.className = 'btn btn-secondary';
     document.getElementById('joinText').textContent = 'Salir del canal';
-    syncTourist(micActive);
+    syncTourist(guideIsLive);
     socket.emit('tourist-ready', { id_grupo });
   } else {
     btn.className = 'btn btn-primary';
     document.getElementById('joinText').textContent = 'Unirse al canal';
     syncTourist(false);
     socket.emit('tourist-leave', { id_grupo });
+
+    // Cerrar conexiones WebRTC y parar el audio
+    Object.values(peerConnections).forEach(pc => pc.close());
+    peerConnections = {};
+    const audio = document.getElementById('remoteAudio');
+    audio.srcObject = null;
+    audio.pause();
   }
 }
 
