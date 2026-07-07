@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tourist Road Guides - Radio Guía</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <!-- Pantalla de carga -->
+  <div id="loadingScreen" style="text-align:center; padding:60px 20px;">
+    <div class="logo" style="margin: 0 auto 16px; width:56px; height:56px; border-radius:12px; background:#1D9E75; display:flex; align-items:center; justify-content:center;">
+      <i class="ti ti-map-2" style="color:white; font-size:28px;"></i>
+    </div>
+    <p style="font-size:16px; font-weight:500; color:#1A1A2E;">Verificando acceso...</p>
+    <p style="font-size:13px; color:#888; margin-top:8px;" id="loadingMsg">Consultando grupo</p>
+  </div>
+
+  <!-- Pantalla de error -->
+  <div id="errorScreen" style="display:none; text-align:center; padding:60px 20px;">
+    <i class="ti ti-lock" style="font-size:48px; color:#ccc;"></i>
+    <p style="font-size:16px; font-weight:500; margin-top:16px;" id="errorMsg">Sin acceso</p>
+  </div>
+
+  <!-- Vista Guía -->
+  <div id="guideView" style="display:none;">
+    <div class="header">
+      <div class="logo"><i class="ti ti-map-2"></i></div>
+      <div>
+        <h1>Tourist Road Guides</h1>
+        <p id="guideGroupName">Radio Guía</p>
+      </div>
+    </div>
+    <div class="panel active" style="display:block;">
+      <div class="card">
+        <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+          <i class="ti ti-microphone" id="micIcon"></i>
+        </button>
+        <p style="font-size:14px; color:#888; margin-bottom:4px;">Estado</p>
+        <p style="font-size:18px; font-weight:500;" id="micStatus">Inactivo</p>
+      </div>
+      <div class="info-row">
+        <div class="info-box">
+          <div class="val" id="listenerCount">0</div>
+          <div class="lbl">escuchando</div>
+        </div>
+        <div class="info-box">
+          <div class="val" id="timeActive">0:00</div>
+          <div class="lbl">tiempo activo</div>
+        </div>
+      </div>
+      <p class="hint">Pulsa el micrófono para empezar a emitir.</p>
+    </div>
+  </div>
+
+  <!-- Vista Turista -->
+  <div id="touristView" style="display:none;">
+    <div class="header">
+      <div class="logo"><i class="ti ti-map-2"></i></div>
+      <div>
+        <h1>Tourist Road Guides</h1>
+        <p id="touristGroupName">Radio Guía</p>
+      </div>
+    </div>
+    <div class="panel active" style="display:block; padding:20px;">
+      <div class="card">
+        <span class="badge offline" id="listenerBadge">Sin emisión</span>
+        <div class="wave" id="audioWave">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div>
+        </div>
+        <p style="font-size:14px; color:#888;" id="listenerStatus">El guía no está emitiendo</p>
+      </div>
+      <button class="btn btn-primary" id="joinBtn" onclick="toggleJoin()">
+        <i class="ti ti-headphones"></i>
+        <span id="joinText">Unirse al canal</span>
+      </button>
+      <p class="hint" style="margin-top:12px;">Cuando el guía empiece a hablar, el audio llegará automáticamente.</p>
+    </div>
+  </div>
+
+  <audio id="remoteAudio" autoplay></audio>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/radioguia.js"></script>
+</body>
+</html>
